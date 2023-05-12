@@ -31,3 +31,13 @@ lint-markdown:
     - markdownlint-cli2 "blog/**/*.md" "docs/**/*.md"  # Lint all markdown files in blog/ and docs/
   allow_failure: true  # This job fails right now, but don't let it stop the pipeline.
 
+test-html:
+  stage: test
+  image: node
+  dependencies:
+    - build-job        # Only fetch artifacts from `build-job`
+  script:
+    - npm install --save-dev htmlhint                  # Install HTMLHint into the container
+    - npx htmlhint --version                           # Verify the version, useful for troubleshooting
+    - npx htmlhint build/                              # Lint all markdown files in blog/ and docs/
+
