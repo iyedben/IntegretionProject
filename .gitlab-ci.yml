@@ -3,47 +3,51 @@ stages:          # List of stages for jobs and their order of execution
   - test
   - deploy
 
+default:
+  image: node
+
+
+.standard-rules:       # Make a hidden job to hold the common rules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 build-job:
   stage: build   # Set this job to run in the `build` stage
-  image: node
+  extends: 
+    - .standard-rules # Reuse config here
   script:
     - npm install
     - npm run build
   artifacts:
     paths:
       - "build/"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'  # Run for all changes to a merge request's source branch
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH       # Run for all changes to the default branch
 
 lint-markdown:
   stage: test
-  image: node
+  extends: 
+    - .standard-rules # Reuse config here
   dependencies: []     # Don't fetch any artifacts
   script:
     - npm install markdownlint-cli2 --global           # Install markdownlint into the container
     - markdownlint-cli2 -v                             # Verify the version, useful for troubleshooting
     - markdownlint-cli2 "blog/**/*.md" "docs/**/*.md"  # Lint all markdown files in blog/ and docs/
   allow_failure: true  # This job fails right now, but don't let it stop the pipeline.
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'  # Run for all changes to a merge request's source branch
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH       # Run for all changes to the default branch
 
 test-html:
   stage: test
-  image: node
+  extends: 
+    - .standard-rules # Reuse config here
   dependencies:
     - build-job        # Only fetch artifacts from `build-job`
   script:
     - npm install --save-dev htmlhint                  # Install HTMLHint into the container
     - npx htmlhint --version                           # Verify the version, useful for troubleshooting
     - npx htmlhint build/                              # Lint all markdown files in blog/ and docs/
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'  # Run for all changes to a merge request's source branch
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH       # Run for all changes to the default branch
 
 pages:
   stage: deploy  # Set this new job to run in the `deploy` stage
+  image: busybox
   script:
     - mv build/ public/
   artifacts:
