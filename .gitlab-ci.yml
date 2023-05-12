@@ -23,12 +23,11 @@ pages:
 
 lint-markdown:
   stage: test
-  image: tmknom/markdownlint #node
+  image: node
   dependencies: []     # Don't fetch any artifacts
   script:
-    - "blog/**/*.md" "docs/**/*.md"  # Lint all markdown files in blog/ and docs/
-#    - npm install markdownlint-cli2 --global           # Install markdownlint into the container
-#    - markdownlint-cli2 -v                             # Verify the version, useful for troubleshooting
-#    - markdownlint-cli2 "blog/**/*.md" "docs/**/*.md"  # Lint all markdown files in blog/ and docs/
+    - npm install markdownlint-cli2 --global           # Install markdownlint into the container
+    - markdownlint-cli2 -v                             # Verify the version, useful for troubleshooting
+    - markdownlint-cli2 "blog/**/*.md" "docs/**/*.md"  # Lint all markdown files in blog/ and docs/
   allow_failure: true  # This job fails right now, but don't let it stop the pipeline.
 
