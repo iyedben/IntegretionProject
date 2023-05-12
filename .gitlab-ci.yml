@@ -1,5 +1,6 @@
 stages:          # List of stages for jobs and their order of execution
   - build
+  - test
   - deploy
 
 build-job:
@@ -19,4 +20,14 @@ pages:
   artifacts:
     paths:
       - "public/"
+
+lint-markdown:
+  stage: test
+  image: tmknom/markdownlint #node
+  dependencies: []     # Don't fetch any artifacts
+  script:
+#    - npm install markdownlint-cli2 --global           # Install markdownlint into the container
+    - markdownlint-cli2 -v                             # Verify the version, useful for troubleshooting
+    - markdownlint-cli2 "blog/**/*.md" "docs/**/*.md"  # Lint all markdown files in blog/ and docs/
+  allow_failure: true  # This job fails right now, but don't let it stop the pipeline.
 
